@@ -70,7 +70,7 @@ async function analyzeCode(
       const prompt = createPrompt(file, chunk, prDetails);
       const aiResponse = await getAIResponse(prompt);
       if (aiResponse) {
-        const newComments = createComment(file, chunk, aiResponse);
+        const newComments: Array<{ body: string; path: string; line: number }> = createComment(file, chunk, aiResponse);
         if (newComments) {
           comments.push(...newComments);
         }
@@ -173,7 +173,7 @@ function createComment(
       return [];
     }
     return {
-      body: aiResponse.reviewComment,
+      body: "[GPT-REVIEW Comment] " + aiResponse.reviewComment,
       path: file.to,
       line: Number(aiResponse.lineNumber),
     };
