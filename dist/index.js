@@ -181,7 +181,7 @@ function createComment(file, chunk, aiResponses) {
             return [];
         }
         return {
-            body: "[GPT-REVIEW Comment] " + aiResponse.reviewComment,
+            body: "[GPT-REVIEW] " + aiResponse.reviewComment,
             path: file.to,
             line: Number(aiResponse.lineNumber),
         };
