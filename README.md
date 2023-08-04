@@ -40,7 +40,7 @@ jobs:
       - name: AI Code Reviewer
         uses: your-username/ai-code-reviewer@main
         with:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.OCTOKIT_TOKEN }}
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           OPENAI_API_MODEL: "gpt-4" # Optional: defaults to "gpt-4"
           exclude: "**/*.json, **/*.md" # Optional: exclude patterns separated by commas
