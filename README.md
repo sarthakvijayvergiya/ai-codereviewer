@@ -19,7 +19,9 @@ review process.
 2. Add the OpenAI API key as a GitHub Secret in your repository with the name `OPENAI_API_KEY`. You can find more
    information about GitHub Secrets [here](https://docs.github.com/en/actions/reference/encrypted-secrets).
 
-3. Create a `.github/workflows/main.yml` file in your repository and add the following content:
+3. Add a Github token as a GitHub Secret in your repository with the name `OCTOKIT_TOKEN`. You can find more information about this token andhow to generate it [here](https://dev.to/gr2m/github-api-authentication-personal-access-tokens-53kd). It should only need `repo` access.
+
+4. Create a `.github/workflows/main.yml` file in your repository and add the following content:
 
 ```yaml
 name: AI Code Reviewer
