@@ -48,10 +48,10 @@ const openai_1 = __nccwpck_require__(9211);
 const rest_1 = __nccwpck_require__(5375);
 const parse_diff_1 = __importDefault(__nccwpck_require__(4833));
 const minimatch_1 = __importDefault(__nccwpck_require__(2002));
-const OCTO_TOKEN = core.getInput("OCTO_TOKEN");
+const OCTOKIT_TOKEN = core.getInput("OCTOKIT_TOKEN");
 const OPENAI_API_KEY = core.getInput("OPENAI_API_KEY");
 const OPENAI_API_MODEL = core.getInput("OPENAI_API_MODEL");
-const octokit = new rest_1.Octokit({ auth: OCTO_TOKEN });
+const octokit = new rest_1.Octokit({ auth: OCTOKIT_TOKEN });
 const configuration = new openai_1.Configuration({
     apiKey: OPENAI_API_KEY,
 });

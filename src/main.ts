@@ -5,11 +5,11 @@ import { Octokit } from "@octokit/rest";
 import parseDiff, { Chunk, File } from "parse-diff";
 import minimatch from "minimatch";
 
-const OCTO_TOKEN: string = core.getInput("OCTO_TOKEN");
+const OCTOKIT_TOKEN: string = core.getInput("OCTOKIT_TOKEN");
 const OPENAI_API_KEY: string = core.getInput("OPENAI_API_KEY");
 const OPENAI_API_MODEL: string = core.getInput("OPENAI_API_MODEL");
 
-const octokit = new Octokit({ auth: OCTO_TOKEN });
+const octokit = new Octokit({ auth: OCTOKIT_TOKEN });
 
 const configuration = new Configuration({
   apiKey: OPENAI_API_KEY,
