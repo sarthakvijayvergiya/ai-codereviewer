@@ -1,21 +1,35 @@
 import { readFileSync } from "fs";
 import * as core from "@actions/core";
-import { Configuration, OpenAIApi } from "openai";
+import { AzureOpenAI } from "openai";
 import { Octokit } from "@octokit/rest";
 import parseDiff, { Chunk, File } from "parse-diff";
 import minimatch from "minimatch";
+import { AzureKeyCredential } from "@azure/openai";
 
 const OCTOKIT_TOKEN: string = core.getInput("OCTOKIT_TOKEN");
 const OPENAI_API_KEY: string = core.getInput("OPENAI_API_KEY");
+const OPEN_API_ENDPOINT: string = core.getInput("OPEN_API_ENDPOINT");
 const OPENAI_API_MODEL: string = core.getInput("OPENAI_API_MODEL");
 
 const octokit = new Octokit({ auth: OCTOKIT_TOKEN });
 
-const configuration = new Configuration({
-  apiKey: OPENAI_API_KEY,
-});
+// const configuration = new Configuration({
+//   apiKey: OPENAI_API_KEY,
+// });
 
-const openai = new OpenAIApi(configuration);
+// const openai = new OpenAIApi(configuration);
+
+const apiKey = new AzureKeyCredential(OPENAI_API_KEY);
+const endpoint = OPEN_API_ENDPOINT;
+const apiVersion = "2024-10-21"
+const deployment = OPENAI_API_MODEL;
+
+const openai = new AzureOpenAI({ 
+    apiKey, 
+    endpoint, 
+    apiVersion, 
+    deployment 
+});
 
 interface PRDetails {
   owner: string;
