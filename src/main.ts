@@ -78,20 +78,32 @@ async function analyzeCode(
   prDetails: PRDetails
 ): Promise<Array<{ body: string; path: string; line: number }>> {
   const comments: Array<{ body: string; path: string; line: number }> = [];
+  console.log(`Analyzing ${parsedDiff.length} files...`);
 
   for (const file of parsedDiff) {
-    if (file.to === "/dev/null") continue; // Ignore deleted files
+    console.log(`Processing file: ${file.to}`);
+    if (file.to === "/dev/null") {
+      console.log('Skipping deleted file');
+      continue;
+    }
+    
     for (const chunk of file.chunks) {
       const prompt = createPrompt(file, chunk, prDetails);
+      console.log('Sending prompt to OpenAI...');
       const aiResponse = await getAIResponse(prompt);
+      console.log('AI Response:', aiResponse);
+      
       if (aiResponse) {
-        const newComments: Array<{ body: string; path: string; line: number }> = createComment(file, chunk, aiResponse);
+        const newComments = createComment(file, chunk, aiResponse);
+        console.log('Generated comments:', newComments);
         if (newComments) {
           comments.push(...newComments);
         }
       }
     }
   }
+  
+  console.log(`Total comments generated: ${comments.length}`);
   return comments;
 }
 
@@ -157,6 +169,13 @@ async function getAIResponse(prompt: string): Promise<Array<{
   };
 
   try {
+    console.log('OpenAI Configuration:', {
+      baseURL: OPEN_API_ENDPOINT + "/openai",
+      apiVersion,
+      deployment: OPENAI_API_MODEL,
+      model: OPENAI_API_MODEL
+    });
+    
     const response = await openai.chat.completions.create({
       ...queryConfig,
       messages: [
@@ -167,10 +186,16 @@ async function getAIResponse(prompt: string): Promise<Array<{
       ],
     });
 
+    console.log('OpenAI Response:', {
+      status: 'success',
+      choices: response.choices.length,
+      content: response.choices[0].message?.content
+    });
+
     const res = response.choices[0].message?.content?.trim() || "[]";
     return JSON.parse(res);
   } catch (error) {
-    console.error("Error:", error);
+    console.error("OpenAI Error:", error);
     return null;
   }
 }
@@ -211,64 +236,88 @@ async function createReviewComment(
 }
 
 async function main() {
-  const prDetails = await getPRDetails();
-  let diff: string | null;
-  const eventData = JSON.parse(
-    readFileSync(process.env.GITHUB_EVENT_PATH ?? "", "utf8")
-  );
+  try {
+    console.log('Starting PR review process...');
+    const prDetails = await getPRDetails();
+    console.log('PR Details:', prDetails);
 
-  if (eventData.action === "opened") {
-    diff = await getDiff(
-      prDetails.owner,
-      prDetails.repo,
-      prDetails.pull_number
+    let diff: string | null;
+    const eventData = JSON.parse(
+      readFileSync(process.env.GITHUB_EVENT_PATH ?? "", "utf8")
     );
-  } else if (eventData.action === "synchronize") {
-    const newBaseSha = eventData.before;
-    const newHeadSha = eventData.after;
+    console.log('Event type:', eventData.action);
 
-    const response = await octokit.repos.compareCommits({
-      headers: {
-        accept: "application/vnd.github.v3.diff",
-      },
-      owner: prDetails.owner,
-      repo: prDetails.repo,
-      base: newBaseSha,
-      head: newHeadSha,
+    if (eventData.action === "opened") {
+      console.log('Getting diff for newly opened PR...');
+      diff = await getDiff(
+        prDetails.owner,
+        prDetails.repo,
+        prDetails.pull_number
+      );
+    } else if (eventData.action === "synchronize") {
+      console.log('Getting diff for PR update...');
+      const newBaseSha = eventData.before;
+      const newHeadSha = eventData.after;
+      console.log(`Comparing commits: ${newBaseSha} -> ${newHeadSha}`);
+
+      const response = await octokit.repos.compareCommits({
+        headers: {
+          accept: "application/vnd.github.v3.diff",
+        },
+        owner: prDetails.owner,
+        repo: prDetails.repo,
+        base: newBaseSha,
+        head: newHeadSha,
+      });
+
+      diff = String(response.data);
+    } else {
+      console.log("Unsupported event:", process.env.GITHUB_EVENT_NAME);
+      return;
+    }
+
+    if (!diff) {
+      console.log("No diff found");
+      return;
+    }
+    console.log('Diff content length:', diff.length);
+
+    const parsedDiff = parseDiff(diff);
+    console.log(`Parsed ${parsedDiff.length} files from diff`);
+
+    const excludePatterns = core
+      .getInput("exclude")
+      .split(",")
+      .map((s) => s.trim());
+    console.log('Exclude patterns:', excludePatterns);
+
+    const filteredDiff = parsedDiff.filter((file) => {
+      const shouldInclude = !excludePatterns.some((pattern) =>
+        minimatch(file.to ?? "", pattern)
+      );
+      console.log(`File ${file.to}: ${shouldInclude ? 'included' : 'excluded'}`);
+      return shouldInclude;
     });
+    console.log(`After filtering: ${filteredDiff.length} files to analyze`);
 
-    diff = String(response.data);
-  } else {
-    console.log("Unsupported event:", process.env.GITHUB_EVENT_NAME);
-    return;
-  }
-
-  if (!diff) {
-    console.log("No diff found");
-    return;
-  }
-
-  const parsedDiff = parseDiff(diff);
-
-  const excludePatterns = core
-    .getInput("exclude")
-    .split(",")
-    .map((s) => s.trim());
-
-  const filteredDiff = parsedDiff.filter((file) => {
-    return !excludePatterns.some((pattern) =>
-      minimatch(file.to ?? "", pattern)
-    );
-  });
-
-  const comments = await analyzeCode(filteredDiff, prDetails);
-  if (comments.length > 0) {
-    await createReviewComment(
-      prDetails.owner,
-      prDetails.repo,
-      prDetails.pull_number,
-      comments
-    );
+    const comments = await analyzeCode(filteredDiff, prDetails);
+    console.log(`Generated ${comments.length} comments`);
+    
+    if (comments.length > 0) {
+      console.log('Posting comments to PR...');
+      await createReviewComment(
+        prDetails.owner,
+        prDetails.repo,
+        prDetails.pull_number,
+        comments
+      );
+      console.log('Successfully posted comments');
+    } else {
+      console.log('No comments to post');
+    }
+  } catch (error) {
+    console.error('Error in main function:', error);
+    throw error;
   }
 }
 
