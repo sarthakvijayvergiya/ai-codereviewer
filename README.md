@@ -49,12 +49,9 @@ jobs:
           exclude: "**/*.json, **/*.md" # Optional: exclude patterns separated by commas
 ```
 
-4. Replace `Ostrich-Cyber-Risk` with your GitHub username or organization name where the AI Code Reviewer repository is
-   located (optional).
+4. Customize the `exclude` input if you want to ignore certain file patterns from being reviewed.
 
-5. Customize the `exclude` input if you want to ignore certain file patterns from being reviewed.
-
-6. Commit the changes to your repository, and AI Code Reviewer will start working on your future pull requests.
+5. Commit the changes to your repository, and AI Code Reviewer will start working on your future pull requests.
 
 ## How It Works
 
