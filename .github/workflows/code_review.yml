@@ -16,7 +16,7 @@ jobs:
       - name: Code Review
         uses: sarthakvijayvergiya/ai-codereviewer@main
         with:
-          OCTOKIT_TOKEN: ${{ secrets.OCTOKIT_TOKEN }}
+          OCTOKIT_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           OPEN_API_ENDPOINT: ${{ secrets.OPEN_API_ENDPOINT }}
           OPENAI_API_MODEL: gpt-4
