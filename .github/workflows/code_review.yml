@@ -4,7 +4,9 @@ on:
     types:
       - opened
       - synchronize
-permissions: write-all
+permissions:
+  contents: read
+  pull-requests: write
 jobs:
   code_review:
     runs-on: ubuntu-latest
@@ -12,8 +14,10 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
       - name: Code Review
-        uses: freeedcom/ai-codereviewer@main
+        uses: sarthakvijayvergiya/ai-codereviewer@main
         with:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          OCTOKIT_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-          exclude: "yarn.lock,dist/**"
+          OPEN_API_ENDPOINT: ${{ secrets.OPEN_API_ENDPOINT }}
+          OPENAI_API_MODEL: gpt-4
+          exclude: "**/*.json, **/*.md"
