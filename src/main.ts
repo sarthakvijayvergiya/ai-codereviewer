@@ -26,7 +26,7 @@ const apiVersion = "2024-10-21"
 const deployment = OPENAI_API_MODEL;
 
 const openai = new AzureOpenAI({ 
-    endpoint: endpoint, 
+    baseURL: endpoint + "/openai",
     apiKey: apiKey.key, 
     apiVersion: apiVersion, 
     deployment: deployment 
