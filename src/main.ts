@@ -4,7 +4,8 @@ import { AzureOpenAI } from "openai";
 import { Octokit } from "@octokit/rest";
 import parseDiff, { Chunk, File } from "parse-diff";
 import minimatch from "minimatch";
-import { AzureKeyCredential } from "@azure/openai";
+import { AzureKeyCredential } from "@azure/core-auth";
+
 
 const OCTOKIT_TOKEN: string = core.getInput("OCTOKIT_TOKEN");
 const OPENAI_API_KEY: string = core.getInput("OPENAI_API_KEY");
@@ -25,10 +26,10 @@ const apiVersion = "2024-10-21"
 const deployment = OPENAI_API_MODEL;
 
 const openai = new AzureOpenAI({ 
-    apiKey, 
-    endpoint, 
-    apiVersion, 
-    deployment 
+    endpoint: endpoint, 
+    apiKey: apiKey.key, 
+    apiVersion: apiVersion, 
+    deployment: deployment 
 });
 
 interface PRDetails {
@@ -156,7 +157,7 @@ async function getAIResponse(prompt: string): Promise<Array<{
   };
 
   try {
-    const response = await openai.createChatCompletion({
+    const response = await openai.chat.completions.create({
       ...queryConfig,
       messages: [
         {
@@ -166,7 +167,7 @@ async function getAIResponse(prompt: string): Promise<Array<{
       ],
     });
 
-    const res = response.data.choices[0].message?.content?.trim() || "[]";
+    const res = response.choices[0].message?.content?.trim() || "[]";
     return JSON.parse(res);
   } catch (error) {
     console.error("Error:", error);

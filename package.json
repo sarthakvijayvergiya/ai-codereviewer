@@ -13,9 +13,11 @@
   },
   "dependencies": {
     "@actions/core": "^1.10.0",
+    "@azure/core-auth": "^1.9.0",
+    "@azure/openai": "^2.0.0",
     "@octokit/rest": "^19.0.7",
     "minimatch": "^7.4.2",
-    "openai": "^3.2.1",
+    "openai": "^4.86.1",
     "parse-diff": "^0.11.1",
     "ts-node": "^10.9.1"
   },
@@ -24,5 +26,6 @@
     "@vercel/ncc": "^0.36.1",
     "prettier": "^2.8.6",
     "typescript": "^5.0.2"
-  }
+  },
+  "packageManager": "yarn@1.22.22+sha1.ac34549e6aa8e7ead463a7407e1c7390f61a6610"
 }
