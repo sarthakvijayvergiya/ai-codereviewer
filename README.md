@@ -40,10 +40,11 @@ jobs:
         uses: actions/checkout@v3
 
       - name: AI Code Reviewer
-        uses: Ostrich-Cyber-Risk/ai-codereviewer@main
+        uses: sarthakvijayvergiya/ai-codereviewer@main
         with:
-          GITHUB_TOKEN: ${{ secrets.OCTOKIT_TOKEN }}
+          OCTOKIT_TOKEN: ${{ secrets.OCTOKIT_TOKEN }}
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          OPEN_API_ENDPOINT: ${{ secrets.OPEN_API_ENDPOINT }}
           OPENAI_API_MODEL: "gpt-4" # Optional: defaults to "gpt-4"
           exclude: "**/*.json, **/*.md" # Optional: exclude patterns separated by commas
 ```
